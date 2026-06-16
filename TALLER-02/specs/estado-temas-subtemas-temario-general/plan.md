@@ -17,6 +17,12 @@ El temario general no ofrece una forma clara de conocer qué temas y subtemas es
 ### Modified Capabilities
 - 
 
+## Tasks
+
+- Definir la estructura del estado por tema y subtema.
+- Alinear la consulta jerarquica y el calculo agregado con la spec.
+- Verificar la cobertura de validacion antes de implementar.
+
 ## Impact
 
 - UI para visualizar el temario y su progreso.

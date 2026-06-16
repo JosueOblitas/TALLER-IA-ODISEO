@@ -3,7 +3,40 @@
  Guía de arquitectura y desarrollo para odiseo-backend y odiseo-frontend.
  
 ---
- 
+
+## Workflow prioritario
+
+### 0. Descubrimiento obligatorio
+
+Antes de proponer o implementar un cambio, buscar primero en `specs/**/spec.md`.
+
+Si el cambio ya existe, revisar en este orden:
+
+1. `specs/<cambio>/spec.md`
+2. `specs/<cambio>/plan.md`
+3. `specs/<cambio>/test-cases.md`
+
+### 1. Estructura estándar de un cambio
+
+Todo cambio debe vivir dentro de `specs/<cambio>/` y usar esta estructura:
+
+| Ruta | Propósito |
+|---|---|
+| `specs/<cambio>/spec.md` | Contrato funcional: que debe hacer el sistema |
+| `specs/<cambio>/plan.md` | Plan tecnico y operativo. Debe incluir una seccion obligatoria `## Tasks` |
+| `specs/<cambio>/test-cases.md` | Casos de prueba y validacion del cambio |
+
+### 2. Gates de validacion prioritarios
+
+1. **Gate Spec**: `spec.md` debe estar completo, claro y testeable.
+2. **Gate Plan**: `plan.md` debe explicar la estrategia de implementacion y contener `## Tasks`.
+3. **Gate Test-Cases**: `test-cases.md` debe cubrir los escenarios y bordes principales.
+4. **Gate Implementation**: solo se implementa cuando los tres archivos anteriores estan alineados.
+
+### 3. Regla de bloqueo
+
+Si falta cualquiera de los archivos requeridos o si los archivos no coinciden entre si, el trabajo se detiene hasta corregir la inconsistencia.
+
 ## Principios fundamentales
  
 ### I. Arquitectura hexagonal progresiva
