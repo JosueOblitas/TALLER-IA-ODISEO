@@ -38,13 +38,6 @@
 - [ ] **[DOM-10]** Dado un tema sin subtemas, cuando se desactiva, entonces la operación debe completarse sin errores.
 - [ ] **[DOM-11]** Dado un tema con subtemas anidados en múltiples niveles (sub-subtemas), cuando el tema raíz se desactiva, entonces todos los descendientes deben pasar a `Inactivo`.
 
-### 1.3 Consulta jerárquica con progreso agregado
-
-- [ ] **[DOM-12]** Dado un tema con subtemas, cuando se consulta el progreso, entonces el estado del tema debe reflejar el progreso agregado según la proporción de subtemas activos.
-- [ ] **[DOM-13]** Dado un tema con 0% de subtemas activos, cuando se consulta el progreso, entonces el tema debe mostrarse como `Inactivo` (o 0%).
-- [ ] **[DOM-14]** Dado un tema con 100% de subtemas activos, cuando se consulta el progreso, entonces el tema debe mostrarse como `Activo` (o 100%).
-- [ ] **[DOM-15]** Dado un tema con una mezcla de subtemas activos e inactivos, cuando se consulta el progreso, entonces el progreso debe calcularse como la fracción de subtemas activos sobre el total.
-
 ---
 
 ## 2. API / Controladores
@@ -171,39 +164,7 @@
 
 ---
 
-## 9. Requisitos no funcionales (NFR)
-
-- [ ] **[NFR-01]** La consulta de temas con filtro por estado debe responder en menos de 500ms para catálogos de hasta 10,000 registros.
-- [ ] **[NFR-02]** El cambio de estado debe generar un registro de auditoría con: usuario, timestamp, estado anterior y estado nuevo.
-- [ ] **[NFR-03]** Las consultas de indexación y configuración académica deben excluir por defecto los registros inactivos (WHERE status = 'activo' implícito).
-- [ ] **[NFR-04]** La desactivación de un tema con 100 subtemas no debe tomar más de 2 segundos.
-- [ ] **[NFR-05]** La reactivación de un tema no debe propagarse a subtemas (solo afecta al nodo).
-
----
-
-## 10. Permisos y autenticación
-
-- [ ] **[CONST-01]** Dado un usuario sin rol de administrador, cuando intenta acceder al endpoint de actualización de estado, entonces debe recibir `403`.
-- [ ] **[CONST-02]** Dado un usuario autenticado, cuando consulta el temario, entonces la respuesta debe incluir solo los temas que tiene permiso de ver.
-- [ ] **[CONST-03]** Dado un usuario invitado (no autenticado), cuando intenta acceder a cualquier ruta de estado, entonces debe recibir `401`.
-- [ ] **[CONST-04]** Dado el frontend, cuando un usuario sin permisos ve el temario, entonces los controles de cambio de estado deben estar ocultos.
-
----
-
-## 11. Arquitectura y capas (constitución)
-
-- [ ] **[CONST-05]** El cambio de estado debe implementarse como un **Use Case** final con un único método `execute()`.
-- [ ] **[CONST-06]** El Use Case debe recibir un **DTO de entrada** tipado, no un Request de Laravel ni un array sin tipo.
-- [ ] **[CONST-07]** El Use Case debe retornar un **DTO de salida**, no un modelo Eloquent.
-- [ ] **[CONST-08]** El controlador debe mapear el Request a DTO antes de invocar el Use Case.
-- [ ] **[CONST-09]** La lógica de propagación padre → hijo debe residir en la **capa de dominio** (entidad o servicio de dominio), no en el controlador ni en el repositorio.
-- [ ] **[CONST-10]** La interfaz del repositorio debe definirse en dominio; la implementación con Eloquent en infraestructura.
-- [ ] **[CONST-11]** Las rutas nuevas deben usar versionado `v2` y declarar autenticación y permisos explícitamente.
-- [ ] **[CONST-12]** Las pruebas backend deben usar **Pest** con `declare(strict_types=1)`.
-
----
-
-## 12. Regresión
+## 9. Regresión
 
 - [ ] **[REG-01]** Dado un flujo completo de creación de temario personalizado, después de implementar el filtro por estado, el flujo debe seguir funcionando correctamente.
 - [ ] **[REG-02]** Dado un flujo completo de indexación de preguntas, después de implementar el filtro por estado, el flujo debe seguir funcionando correctamente.
