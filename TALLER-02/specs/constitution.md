@@ -26,16 +26,35 @@ Todo cambio debe vivir dentro de `specs/<cambio>/` y usar esta estructura:
 | `specs/<cambio>/plan.md` | Plan tecnico y operativo. Debe incluir una seccion obligatoria `## Tasks` |
 | `specs/<cambio>/test-cases.md` | Casos de prueba y validacion del cambio |
 
-### 2. Gates de validacion prioritarios
+### 2. Gates de validación (Checklist Ejecutable)
 
-1. **Gate Spec**: `spec.md` debe estar completo, claro y testeable.
-2. **Gate Plan**: `plan.md` debe explicar la estrategia de implementacion y contener `## Tasks`.
-3. **Gate Test-Cases**: `test-cases.md` debe cubrir los escenarios y bordes principales.
-4. **Gate Implementation**: solo se implementa cuando los tres archivos anteriores estan alineados.
+#### Gate 1: Spec (`spec.md`)
+- [ ] Existe **Resumen ejecutivo** (qué y por qué, 3-5 líneas)
+- [ ] Existe **Contexto de negocio**: Problema, Por qué ahora, Impacto esperado
+- [ ] Existen **User Stories** (US-1, US-2...) con **AC** en formato **Given/When/Then**
+- [ ] Cada AC usa estructura: **Dado / Cuando / Entonces**
+- [ ] Existen **NFR** (no funcionales: rendimiento, auditoría, filtrado, persistencia)
+- [ ] Existen **Casos borde** (CB-1, CB-2...) con resultado esperado
+- [ ] Existen **Assumptions** (A-1, A-2...) con condición "Si es falso..."
+- [ ] Existe **Scope**: **DENTRO** y **FUERA** explícitos
+- [ ] Cero detalles de implementación técnica (no "localStorage", "API", "DB", "query", etc.)
 
-### 3. Regla de bloqueo
+#### Gate 2: Plan (`plan.md`)
+- [ ] Existe **Why** (por qué) + **What Changes** (qué cambia)
+- [ ] Existe **Capabilities**: New Capabilities y/o Modified Capabilities
+- [ ] Existe **Tasks** con checkboxes `- [ ]`
+- [ ] Cada task es accionable y testeable
+- [ ] Existe **Impact** (UI, API, Persistencia, Reportes)
 
-Si falta cualquiera de los archivos requeridos o si los archivos no coinciden entre si, el trabajo se detiene hasta corregir la inconsistencia.
+#### Gate 3: Test-Cases (`test-cases.md`)
+- [ ] Agrupa casos por área (Modelo, Presentación, Flujo, etc.)
+- [ ] Cada caso es un checkbox `- [ ]` con descripción clara
+- [ ] Cubre **todos** AC de User Stories + NFR + Casos borde
+- [ ] Casos son independientes y ejecutables
+
+#### Gate 4: Implementation
+- [ ] Los 3 gates anteriores ✅ → implementar
+- [ ] Cualquier ❌ → **BLOQUEADO** hasta corregir
 
 ## Principios fundamentales
  
