@@ -329,6 +329,46 @@ Todas las operaciones deben requerir usuario autenticado.
 | Reportes | Conserva nombres historicos | US-4 |
 | Auditoria | Registra cada cambio de estado | NFR-2 |
 
+### 7.1 Backend Impact Map
+
+| Archivo / funcion | Cambio requerido | Traces to |
+|---|---|---|
+| `routes/settings/topic/RouteTopic.php` | Agregar rutas de impacto/cambio de estado y aceptar filtro de estado en listados. | US-1, US-5 |
+| `routes/settings/subtopic/RouteSubTopic.php` | Agregar rutas de impacto/cambio de estado y aceptar filtro de estado en listados. | US-1, US-5 |
+| `routes/settings/management/RouteManagement.php` | Exponer estado en `management/topics` y `management/subtopics` usados por gestion de contenido. | US-1 |
+| `app/Http/Controllers/V1/Settings/Topic/TopicController.php` | Extender `get`, `getAll`, `getAllManagement`, `updateTopic`; agregar metodos de impacto y estado. | US-1, US-5 |
+| `app/Service/Settings/Topic/TopicService.php` | Orquestar cambio de estado, cascada a subtemas e impacto. | US-1, US-5 |
+| `app/Repository/Settings/Topics/TopicRepositoryPostgreSQL.php` | Filtrar por estado, actualizar estado, calcular impacto y validar temas activos. | US-1, US-2, US-3 |
+| `app/Http/Controllers/V1/Settings/SubTopic/SubTopicController.php` | Extender `get`, `getAll`, `getAllManagement`, `updateSubTopic`; agregar metodos de impacto y estado. | US-1, US-5 |
+| `app/Service/Settings/SubTopic/SubTopicService.php` | Orquestar cambio de estado y validar que no se active bajo tema inactivo. | US-1 |
+| `app/Repository/Settings/SubTopic/SubTopicRepositoryPostgreSQL.php` | Filtrar por estado, actualizar estado, calcular impacto y validar subtemas activos. | US-1, US-2, US-3 |
+| `src/App/Modules/V2/Catalog/Topic/**` | Propagar `availability_status` en DTOs, validators, use cases, responses y queries V2. | US-1, US-3 |
+| `src/App/Modules/V2/Catalog/Subtopic/**` | Propagar `availability_status` en DTOs, validators, use cases, responses y queries V2. | US-1, US-3 |
+| `database/migrations/functions/fn_search_topic` y `fn_search_subtopic` | Devolver y filtrar estado en grillas administrativas. | US-1 |
+| `app/Repository/Settings/TemplateSyllabus/TemplateSyllabusRepositoryPostgreSQL.php` | Ajustar `getTopics`, `getSubTopics`, `saveTopicsTemplateSyllabus`, `saveSubTopicsTemplateSyllabus`. | US-2 |
+| `database/migrations/functions/fn_list_topics_by_universities_and_course_or_pseudo` y `fn_list_subtopics_by_universities_and_topic_and_course` | Excluir inactivos en temario personalizado. | US-2 |
+| `app/Repository/Settings/Syllabus/SyllabusRepositoryPostgreSQL.php` | Ajustar `syllabusTemplateTopics`, `syllabusTemplateSubtopics`, `saveSyllabus`, `editSyllabus`. | US-3, US-4 |
+| `database/migrations/functions/fn_get_syllabus_template_topics`, `fn_get_syllabus_template_subtopics`, `fn_save_syllabus`, `fn_edit_syllabus` | Excluir inactivos en nuevas selecciones y conservar historicos. | US-3, US-4 |
+| `app/Http/Controllers/V1/Bank/QuestionTeacher/QuestionTeacherController.php` y `app/Repository/QuestionTeacher/*` | Filtrar temas/subtemas activos para indexacion. | US-3 |
+| `app/Service/Question/**` y `app/Repository/Question/**` | Rechazar IDs inactivos al indexar/editar y devolver estado para vista historica. | US-3, US-4 |
+
+### 7.2 Frontend Impact Map
+
+| Archivo / funcion | Cambio requerido | Traces to |
+|---|---|---|
+| `src/modules/content-config/services/content.service.js` | Agregar filtro `status`, llamadas de impacto y cambio de estado. | US-1, US-5 |
+| `src/modules/content-config/pages/ContentConfig.page.vue` | Mostrar estado, filtro, modal de advertencia y refresco de listas. | US-1, US-5 |
+| `src/components/odiseo/configuracion/banco/temas/TemasAddEditDialog.vue` | Incluir control/visualizacion de estado de tema. | US-1 |
+| `src/components/odiseo/configuracion/banco/subtemas/SubtemasAddEditDialog.vue` | Incluir control/visualizacion de estado de subtema. | US-1 |
+| `src/modules/personalized-syllabus/services/personalized-syllabus.service.ts` | Filtrar activos en `getTopicsByUniversityIdForTemplateSyllabus` y `getSubtopicsByUniversityIdForTemplateSyllabus`. | US-2 |
+| `src/modules/personalized-syllabus/services/temario-universidad.service.js` | Filtrar activos en topics/subtopics usados por creacion de temario. | US-2 |
+| `src/modules/personalized-syllabus/dialogs/*` y components de seleccion | Ocultar inactivos y mostrar historicos como no seleccionables. | US-2, US-4 |
+| `src/modules/syllabus/services/syllabus.service.ts` | Filtrar activos en `getSyllabusTemplateTopics` y `getSyllabusTemplateSubTopics`. | US-3 |
+| `src/modules/syllabus/components/InitialWeekSubtopicSelection.vue` y `SyllabusEditorQuestions.vue` | Evitar nuevas selecciones inactivas y renderizar historicos en gris. | US-3, US-4 |
+| `src/modules/question-teacher-assigned/dialogs/IndexQuestionDialog.vue` | Usar solo activos al indexar preguntas. | US-3 |
+| `src/components/odiseo/bank/EditAttributesDialog.vue` y `src/modules/shared/components/QuestionAttributesForm.vue` | Ocultar inactivos para nuevas selecciones y mostrar historicos en gris. | US-3, US-4 |
+| Paginas que abren `EditAttributesDialog` en modulos de preguntas | Pasar/mostrar estado actual de tema/subtema en listados y dialogs. | US-4 |
+
 ## 8. Error Handling
 
 | Error | Manejo |
