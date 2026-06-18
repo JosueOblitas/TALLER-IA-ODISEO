@@ -219,6 +219,24 @@ Si es falso, deberá evaluarse migración de datos.
 
 Se asume que la plataforma ya cuenta con infraestructura de auditoría para registrar cambios.
 
+---
+
+# 6. Scope
+
+## DENTRO
+
+- Estado Activo/Inactivo para temas y subtemas del temario general.
+- Propagación de inactividad desde un tema hacia sus subtemas.
+- Restricción de selección de elementos inactivos en flujos académicos nuevos.
+- Conservación de relaciones históricas ya existentes.
+- Advertencia previa al cambio de estado.
+
+## FUERA
+
+- Reglas de negocio de otras entidades del sistema que no dependan de temas o subtemas.
+- Eliminación física de historial académico ya asociado a preguntas.
+- Rediseño completo de pantallas ajenas al temario general.
+
 Si es falso, deberá incorporarse dentro del alcance técnico.
 
 ## A-3
