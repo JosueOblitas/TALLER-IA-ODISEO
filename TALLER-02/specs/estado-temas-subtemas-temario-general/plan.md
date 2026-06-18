@@ -329,7 +329,35 @@ Todas las operaciones deben requerir usuario autenticado.
 | Reportes | Conserva nombres historicos | US-4 |
 | Auditoria | Registra cada cambio de estado | NFR-2 |
 
-### 7.1 Backend Impact Map
+### 7.1 PGSQL Impact Map
+
+Nota: las funciones PostgreSQL estan versionadas dentro del backend en `odiseo-backend/database/migrations/functions`, pero para el plan se separan como mapa PGSQL porque concentran cambios de consultas, filtros, escritura y lectura historica. Cada cambio PGSQL debe tener su migracion Laravel `.php` y el `.sql` que ejecuta en la misma carpeta, siguiendo el patron actual `file_get_contents(__DIR__ . '/nombre.sql')` + `DB::unprepared($sql)`.
+
+| Objeto PGSQL | Migracion Laravel `.php` | Archivo `.sql` en la misma carpeta | Cambio requerido | Traces to |
+|---|---|---|---|---|
+| Tabla `topic` | `database/migrations/tables/table_topic/<timestamp>_add_availability_fields_to_topic.php` | `database/migrations/tables/table_topic/add_availability_fields_to_topic.sql` | Agregar `availability_status`, `availability_changed_by`, `availability_changed_at`, default `ACTIVE` e indices para filtros administrativos. | US-1, NFR-1 |
+| Tabla `subtopic` | `database/migrations/tables/table_subtopic/<timestamp>_add_availability_fields_to_subtopic.php` | `database/migrations/tables/table_subtopic/add_availability_fields_to_subtopic.sql` | Agregar `availability_status`, `availability_changed_by`, `availability_changed_at`, default `ACTIVE` e indice por `topic_id` + estado. | US-1, NFR-1 |
+| Tabla `catalog_availability_status_history` | `database/migrations/tables/table_catalog_availability_status_history/<timestamp>_create_catalog_availability_status_history.php` | `database/migrations/tables/table_catalog_availability_status_history/create_catalog_availability_status_history.sql` | Crear historial de cambios con tipo de item, id, estado anterior, estado nuevo, usuario, fecha y cantidad de hijos afectados. | US-1, US-5, NFR-2 |
+| Funcion `fn_search_topic` | `database/migrations/functions/fn_search_topic/<timestamp>_update_fn_search_topic_availability_status.php` | `database/migrations/functions/fn_search_topic/fn_search_topic.sql` | Devolver estado operativo y aceptar parametro de filtro `p_availability_status` con `ACTIVE`, `INACTIVE` o `NULL` para todos. | US-1 |
+| Funcion `fn_search_subtopic` | `database/migrations/functions/fn_search_subtopic/<timestamp>_update_fn_search_subtopic_availability_status.php` | `database/migrations/functions/fn_search_subtopic/fn_search_subtopic.sql` | Devolver estado operativo y aceptar parametro de filtro `p_availability_status`, respetando tema padre. | US-1 |
+| Funcion `fn_get_topic_availability_impact` | `database/migrations/functions/fn_get_topic_availability_impact/<timestamp>_create_fn_get_topic_availability_impact.php` | `database/migrations/functions/fn_get_topic_availability_impact/fn_get_topic_availability_impact.sql` | Contar subtemas que se desactivaran, temarios personalizados, syllabus y preguntas asociadas antes del cambio. | US-5, US-4 |
+| Funcion `fn_get_subtopic_availability_impact` | `database/migrations/functions/fn_get_subtopic_availability_impact/<timestamp>_create_fn_get_subtopic_availability_impact.php` | `database/migrations/functions/fn_get_subtopic_availability_impact/fn_get_subtopic_availability_impact.sql` | Contar temarios personalizados, syllabus y preguntas asociadas antes del cambio. | US-5, US-4 |
+| Funcion `fn_update_topic_availability_status` | `database/migrations/functions/fn_update_topic_availability_status/<timestamp>_create_fn_update_topic_availability_status.php` | `database/migrations/functions/fn_update_topic_availability_status/fn_update_topic_availability_status.sql` | Actualizar tema y, si pasa a `INACTIVE`, desactivar subtemas en lote dentro de una misma transaccion y registrar historial. | US-1, US-5 |
+| Funcion `fn_update_subtopic_availability_status` | `database/migrations/functions/fn_update_subtopic_availability_status/<timestamp>_create_fn_update_subtopic_availability_status.php` | `database/migrations/functions/fn_update_subtopic_availability_status/fn_update_subtopic_availability_status.sql` | Actualizar subtema, rechazar activacion si el tema padre esta inactivo y registrar historial. | US-1 |
+| Funcion `fn_list_topics_by_universities_and_course_or_pseudo` | `database/migrations/functions/fn_list_topics_by_universities_and_course_or_pseudo/<timestamp>_update_fn_list_topics_by_universities_and_course_or_pseudo_availability.php` | `database/migrations/functions/fn_list_topics_by_universities_and_course_or_pseudo/fn_list_topics_by_universities_and_course_or_pseudo.sql` | Excluir temas inactivos en temario personalizado para nuevas selecciones. | US-2 |
+| Funcion `fn_list_subtopics_by_universities_and_topic_and_course` | `database/migrations/functions/fn_list_subtopics_by_universities_and_topic_and_course/<timestamp>_update_fn_list_subtopics_by_universities_and_topic_and_course_availability.php` | `database/migrations/functions/fn_list_subtopics_by_universities_and_topic_and_course/fn_list_subtopics_by_universities_and_topic_and_course.sql` | Excluir subtemas inactivos en temario personalizado para nuevas selecciones. | US-2 |
+| Funcion `fn_get_syllabus_template_topics` | `database/migrations/functions/fn_get_syllabus_template_topics/<timestamp>_update_fn_get_syllabus_template_topics_availability.php` | `database/migrations/functions/fn_get_syllabus_template_topics/fn_get_syllabus_template_topics.sql` | Excluir inactivos en selecciones nuevas de syllabus y conservar lectura historica cuando ya existan relaciones. | US-3, US-4 |
+| Funcion `fn_get_syllabus_template_subtopics` | `database/migrations/functions/fn_get_syllabus_template_subtopics/<timestamp>_update_fn_get_syllabus_template_subtopics_availability.php` | `database/migrations/functions/fn_get_syllabus_template_subtopics/fn_get_syllabus_template_subtopics.sql` | Excluir inactivos en selecciones nuevas de syllabus y conservar lectura historica cuando ya existan relaciones. | US-3, US-4 |
+| Funcion `fn_save_syllabus` | `database/migrations/functions/fn_save_syllabus/<timestamp>_update_fn_save_syllabus_availability_validation.php` | `database/migrations/functions/fn_save_syllabus/fn_save_syllabus.sql` | Validar que nuevas selecciones no guarden temas/subtemas inactivos. | US-3 |
+| Funcion `fn_edit_syllabus` | `database/migrations/functions/fn_edit_syllabus/<timestamp>_update_fn_edit_syllabus_availability_validation.php` | `database/migrations/functions/fn_edit_syllabus/fn_edit_syllabus.sql` | Validar nuevas selecciones, sin borrar relaciones historicas existentes. | US-3, US-4 |
+| Funcion `fn_indexar_question_teacher` | `database/migrations/functions/fn_indexar_question_teacher/<timestamp>_update_fn_indexar_question_teacher_availability_validation.php` | `database/migrations/functions/fn_indexar_question_teacher/fn_indexar_question_teacher.sql` | Rechazar indexacion contra tema/subtema inactivo. | US-3 |
+| Funcion `fn_list_index_question` | `database/migrations/functions/fn_list_index_question/<timestamp>_update_fn_list_index_question_availability.php` | `database/migrations/functions/fn_list_index_question/fn_list_index_question.sql` | Devolver estado actual para render historico y no ofrecer inactivos como nuevas opciones. | US-3, US-4 |
+| Funcion `fn_list_index_question_by_teacher` | `database/migrations/functions/fn_list_index_question_by_teacher/<timestamp>_update_fn_list_index_question_by_teacher_availability.php` | `database/migrations/functions/fn_list_index_question_by_teacher/fn_list_index_question_by_teacher.sql` | Devolver estado actual para render historico en flujo docente. | US-3, US-4 |
+| Funcion `fn_find_question_by_id` | `database/migrations/functions/fn_find_question_by_id/<timestamp>_update_fn_find_question_by_id_availability.php` | `database/migrations/functions/fn_find_question_by_id/fn_find_question_by_id.sql` | Mantener nombres historicos y agregar estado actual de tema/subtema. | US-4 |
+| Funcion `fn_find_question_subtopics` | `database/migrations/functions/fn_find_question_subtopics/<timestamp>_update_fn_find_question_subtopics_availability.php` | `database/migrations/functions/fn_find_question_subtopics/fn_find_question_subtopics.sql` | Mantener subtemas historicos y agregar estado actual para mostrar inactivos en gris. | US-4 |
+| Funcion `fn_find_question_for_previewer` | `database/migrations/functions/fn_find_question_for_previewer/<timestamp>_update_fn_find_question_for_previewer_availability.php` | `database/migrations/functions/fn_find_question_for_previewer/fn_find_question_for_previewer.sql` | Mantener lectura historica en preview y agregar estado actual para render diferenciado. | US-4 |
+
+### 7.2 Backend Impact Map
 
 | Archivo / funcion | Cambio requerido | Traces to |
 |---|---|---|
@@ -344,15 +372,17 @@ Todas las operaciones deben requerir usuario autenticado.
 | `app/Repository/Settings/SubTopic/SubTopicRepositoryPostgreSQL.php` | Filtrar por estado, actualizar estado, calcular impacto y validar subtemas activos. | US-1, US-2, US-3 |
 | `src/App/Modules/V2/Catalog/Topic/**` | Propagar `availability_status` en DTOs, validators, use cases, responses y queries V2. | US-1, US-3 |
 | `src/App/Modules/V2/Catalog/Subtopic/**` | Propagar `availability_status` en DTOs, validators, use cases, responses y queries V2. | US-1, US-3 |
-| `database/migrations/functions/fn_search_topic` y `fn_search_subtopic` | Devolver y filtrar estado en grillas administrativas. | US-1 |
 | `app/Repository/Settings/TemplateSyllabus/TemplateSyllabusRepositoryPostgreSQL.php` | Ajustar `getTopics`, `getSubTopics`, `saveTopicsTemplateSyllabus`, `saveSubTopicsTemplateSyllabus`. | US-2 |
-| `database/migrations/functions/fn_list_topics_by_universities_and_course_or_pseudo` y `fn_list_subtopics_by_universities_and_topic_and_course` | Excluir inactivos en temario personalizado. | US-2 |
 | `app/Repository/Settings/Syllabus/SyllabusRepositoryPostgreSQL.php` | Ajustar `syllabusTemplateTopics`, `syllabusTemplateSubtopics`, `saveSyllabus`, `editSyllabus`. | US-3, US-4 |
-| `database/migrations/functions/fn_get_syllabus_template_topics`, `fn_get_syllabus_template_subtopics`, `fn_save_syllabus`, `fn_edit_syllabus` | Excluir inactivos en nuevas selecciones y conservar historicos. | US-3, US-4 |
 | `app/Http/Controllers/V1/Bank/QuestionTeacher/QuestionTeacherController.php` y `app/Repository/QuestionTeacher/*` | Filtrar temas/subtemas activos para indexacion. | US-3 |
 | `app/Service/Question/**` y `app/Repository/Question/**` | Rechazar IDs inactivos al indexar/editar y devolver estado para vista historica. | US-3, US-4 |
+| `app/Http/Mappers/V1/Settings/Topics/**` | Mapear y validar filtro/estado destino sin mezclarlo con `fl_status`. | US-1 |
+| `app/Http/Mappers/V1/Settings/SubTopic/**` | Mapear y validar filtro/estado destino; propagar mensajes de conflicto padre-hijo. | US-1 |
+| `app/Http/Mappers/V1/Settings/TemplateSyllabus/**` | Pasar filtros de activos y validar guardados con IDs vigentes. | US-2 |
+| `app/Http/Mappers/V1/Settings/Syllabus/**` | Pasar filtros de activos y conservar estado para historicos. | US-3, US-4 |
+| `app/Http/Mappers/V1/Question/**` | Propagar estado actual en detalle/indexacion/atributos y bloquear nuevas selecciones inactivas. | US-3, US-4 |
 
-### 7.2 Frontend Impact Map
+### 7.3 Frontend Impact Map
 
 | Archivo / funcion | Cambio requerido | Traces to |
 |---|---|---|
