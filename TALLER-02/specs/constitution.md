@@ -1,6 +1,12 @@
 # Constitución Odiseo
  
  Guía de arquitectura y desarrollo para odiseo-backend y odiseo-frontend.
+
+Reglas rapidas obligatorias:
+- Antes de implementar, crear rama `feature/OD-<numero>` usando el OD indicado en la primera linea del `spec.md`.
+- Toda migracion PGSQL debe tener par `.php` + `.sql` en la misma carpeta; el `.php` corre el `.sql` con `DB::unprepared`.
+- El nombre de migracion debe ser `<fecha>_<numero-secuencial>_<nombre_funcion_o_tabla>.php`; agregar un digito final secuencial al numero para reconocer el orden, ej. `2026_06_18_342345_fn_search_topic.php`.
+- Hacer commits atomicos por campo, funcion, tabla o ajuste equivalente para trazabilidad del workflow.
  
 ---
 
