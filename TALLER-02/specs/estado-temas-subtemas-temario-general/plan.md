@@ -11,7 +11,7 @@ flowchart TD
     A --> D["UI Syllabus"]
     A --> E["UI Preguntas"]
 
-    B --> F["API Catalogo"]
+    B --> F["API Topics/Subtopics"]
     C --> G["API Temario personalizado"]
     D --> H["API Syllabus"]
     E --> I["API Preguntas"]
@@ -43,7 +43,7 @@ flowchart TD
 
 ## 2. Component Design
 
-### 2.1 Catalog Status Rules
+### 2.1 Topic/Subtopic Status Rules
 
 Responsabilidad:
 Definir estados validos, cambios permitidos y reglas padre-hijo.
@@ -53,7 +53,7 @@ Interfaces:
 - Salida: registro actualizado, estado final, elementos afectados.
 
 Dependencias:
-Catalogo de temas/subtemas, usuario autenticado, transaccion y auditoria.
+Tablas `topic` y `subtopic`, usuario autenticado, transaccion y auditoria.
 
 Traces to: US-1, US-5.
 
@@ -98,7 +98,7 @@ Debe informar:
 
 Traces to: US-5, US-4.
 
-### 2.5 Catalog API
+### 2.5 Topic/Subtopic API
 
 Responsabilidad:
 Exponer operaciones para listar, filtrar y cambiar estado de temas/subtemas.
@@ -443,7 +443,7 @@ Nota: las funciones PostgreSQL estan versionadas dentro del backend en `odiseo-b
 | T2.3 | Agregar validacion para impedir subtema activo bajo tema inactivo. | US-1 |
 | T2.4 | Agregar indices necesarios para filtros por estado. | NFR-1 |
 
-### T3. Backend catalogo
+### T3. Backend topic/subtopic
 
 | Task | Description | Traces to |
 |---|---|---|
